@@ -1,27 +1,30 @@
 {
   "name": "instagram-meme-bot",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "AI-powered automated Instagram meme bot",
   "type": "module",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "publish": "tsx src/publish.ts"
+    "publish": "tsx src/publish.ts",
+    "generate": "tsx src/generate.ts",
+    "review": "tsx src/review.ts",
+    "agent": "tsx src/memeAgent.ts",
+    "image": "tsx src/imageGenerator.ts",
+    "upload": "tsx src/uploadImage.ts",
+    "typecheck": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@supabase/supabase-js": "^2.109.0",
-    "axios": "^1.20.0",
-    "dotenv": "^18.0.5",
+    "@huggingface/inference": "^4.13.4",
+    "@langchain/core": "^0.3.75",
+    "@langchain/langgraph": "^0.2.74",
+    "@supabase/supabase-js": "^2.57.4",
+    "axios": "^1.12.2",
+    "dotenv": "^17.2.2",
     "ws": "^8.22.0"
   },
   "devDependencies": {
-    "@types/node": "^26.6.4",
+    "@types/node": "^24.5.2",
     "@types/ws": "^8.18.2",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
   }
 }
