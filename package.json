@@ -4,13 +4,14 @@
   "description": "AI-powered automated Instagram meme bot",
   "type": "module",
   "scripts": {
-    "publish": "tsx src/publish.ts",
-    "generate": "tsx src/generate.ts",
-    "review": "tsx src/review.ts",
-    "agent": "tsx src/memeAgent.ts",
-    "image": "tsx src/imageGenerator.ts",
-    "upload": "tsx src/uploadImage.ts",
-    "typecheck": "tsc --noEmit"
+    "publish": "tsx src/cli/publish.ts",
+    "generate": "tsx src/cli/generate.ts",
+    "review": "tsx src/cli/review.ts",
+    "agent": "tsx src/cli/agent.ts",
+    "image": "tsx src/cli/image.ts",
+    "upload": "tsx src/cli/upload.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@huggingface/inference": "^4.13.4",

@@ -1,23 +1,4 @@
-import dotenv from "dotenv";
-import { createSupabaseClient } from "./supabaseClient.js";
-
-dotenv.config();
-
-const {
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY,
-} = process.env;
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error(
-    "Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY"
-  );
-}
-
-const supabase = createSupabaseClient(
-  SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY
-);
+import { getSupabaseClient } from "./supabase.js";
 
 export interface MemePoolItem {
   id?: string;
@@ -36,10 +17,8 @@ export interface MemePoolItem {
 /**
  * Add a meme to the meme pool
  */
-export async function addToPool(
-  meme: MemePoolItem
-): Promise<MemePoolItem> {
-  const { data, error } = await supabase
+export async function addToPool(meme: MemePoolItem): Promise<MemePoolItem> {
+  const { data, error } = await getSupabaseClient()
     .from("meme_pool")
     .insert({
       image_url: meme.image_url,
@@ -55,9 +34,7 @@ export async function addToPool(
     .single();
 
   if (error) {
-    throw new Error(
-      `Failed to add meme to pool: ${error.message}`
-    );
+    throw new Error(`Failed to add meme to pool: ${error.message}`);
   }
 
   console.log("Meme added to pool:", data.id);
@@ -68,10 +45,8 @@ export async function addToPool(
 /**
  * Get the next approved meme
  */
-export async function getNextApprovedMeme(): Promise<
-  MemePoolItem | null
-> {
-  const { data, error } = await supabase
+export async function getNextApprovedMeme(): Promise<MemePoolItem | null> {
+  const { data, error } = await getSupabaseClient()
     .from("meme_pool")
     .select("*")
     .eq("status", "approved")
@@ -82,9 +57,7 @@ export async function getNextApprovedMeme(): Promise<
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to fetch approved meme: ${error.message}`
-    );
+    throw new Error(`Failed to fetch approved meme: ${error.message}`);
   }
 
   return data;
@@ -93,10 +66,8 @@ export async function getNextApprovedMeme(): Promise<
 /**
  * Mark a meme as posted
  */
-export async function markAsPosted(
-  id: string
-): Promise<void> {
-  const { error } = await supabase
+export async function markAsPosted(id: string): Promise<void> {
+  const { error } = await getSupabaseClient()
     .from("meme_pool")
     .update({
       status: "posted",
@@ -105,9 +76,7 @@ export async function markAsPosted(
     .eq("id", id);
 
   if (error) {
-    throw new Error(
-      `Failed to mark meme as posted: ${error.message}`
-    );
+    throw new Error(`Failed to mark meme as posted: ${error.message}`);
   }
 
   console.log(`Meme ${id} marked as posted`);
@@ -116,19 +85,15 @@ export async function markAsPosted(
 /**
  * Check whether a hash already exists
  */
-export async function hashExists(
-  hash: string
-): Promise<boolean> {
-  const { data, error } = await supabase
+export async function hashExists(hash: string): Promise<boolean> {
+  const { data, error } = await getSupabaseClient()
     .from("meme_pool")
     .select("id")
     .eq("hash", hash)
     .limit(1);
 
   if (error) {
-    throw new Error(
-      `Failed to check duplicate hash: ${error.message}`
-    );
+    throw new Error(`Failed to check duplicate hash: ${error.message}`);
   }
 
   return data.length > 0;
