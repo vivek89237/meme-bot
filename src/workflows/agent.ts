@@ -1,3 +1,4 @@
+import { COUPLE_HASHTAGS } from "../memes/prompts.js";
 import { getEnv, getInstagramConfig } from "../config/env.js";
 import { addToPool, hashExists } from "../services/pool.js";
 import { createMemeImage } from "./createMeme.js";
@@ -93,9 +94,7 @@ export async function runAgent(): Promise<void> {
   const imageUrl = await uploadImage(imageBuffer, "image/jpeg");
 
   // 7. Caption
-  const caption =
-    `${selected.text}\n\n` +
-    `#memes #programming #developer #coding #relatable`;
+  const caption = `${selected.text}\n\n` + COUPLE_HASHTAGS;
 
   // 8. Save to meme pool
   console.log("\n💾 Saving meme to pool...");

@@ -1,6 +1,6 @@
 # Instagram Meme Bot
 
-A TypeScript command-line workflow that generates developer meme ideas with Hugging Face, reviews and deduplicates them, generates an image, uploads it to Supabase, and publishes it to Instagram.
+A TypeScript command-line workflow that generates wholesome Bubu-Dudu couple meme ideas with Hugging Face, reviews and deduplicates them, generates an image, uploads it to Supabase, and publishes it to Instagram.
 
 ## Development
 
@@ -11,7 +11,7 @@ npm ci
 npm run typecheck
 npm test
 npm run generate
-npm run review -- "When production works but localhost doesn't"
+npm run review -- "When your snacks become our snacks"
 ```
 
 Generation and basic review work locally without credentials. Tests use mocked HTTP responses and do not contact external services.
@@ -54,10 +54,10 @@ The Supabase project must already contain the `meme_pool` table used by `src/ser
 
 ```sh
 # Generate artwork only: describe a visual scene, without caption wording
-npm run image -- "A relieved developer celebrating beside three warning lights"
+npm run image -- "The white panda tries to work at a low desk while the light-brown bear gently hugs it from behind; both look happy."
 
 # Render exact captions locally using the bundled font (no credentials needed)
-npm run render -- generated/artwork.png "Finally fixed the bug." "Accidentally added three new features."
+npm run render -- generated/artwork.png "Me: I need to finish my work." "You: First, finish this hug."
 
 # Upload the finished JPEG and print its signed URL
 npm run upload -- generated/meme.jpg
@@ -100,3 +100,9 @@ export NODE_USE_ENV_PROXY=1
 ```
 
 During live testing, `openai/gpt-oss-120b:fastest` routed to a provider that returned HTTP 403. The explicit `openai/gpt-oss-120b:novita` setting worked for caption generation and review. GPT-OSS requests use low reasoning effort and a minimum 2048-token budget to avoid empty answers when reasoning consumes a short output limit. FLUX.1-dev artwork generation returned HTTP 402 (payment required); successful caption requests do not prove artwork-generation credit/access.
+
+## Bubu-Dudu couple meme prompts
+
+The default agent theme is now wholesome couple humor: cuddles, snacks, sleepy moments, playful teasing, and everyday affection. Shared instructions live in `src/memes/prompts.ts`; edit `IDEA_PROMPT` for joke topics, `COUPLE_CHARACTERS` for the recurring white-panda/brown-bear descriptions, and `ARTWORK_STYLE` for the soft pastel sticker look. The same character description is included in both idea and artwork prompts. Caption review scores affectionate couple humor, and Instagram captions use couple-meme hashtags.
+
+These prompts work with the existing single-scene artwork plus top/bottom caption template. They do not create two- or four-panel comics or reference-conditioned characters. Prompts encourage consistent colors and proportions, but exact character appearance can still vary between generated images. Text stays outside the generated illustration and is rendered in code.
