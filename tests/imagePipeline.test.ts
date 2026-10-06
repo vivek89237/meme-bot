@@ -343,7 +343,7 @@ test("vision review sends the actual image and obtains independent exact-text tr
       }
       assert.ok(String(url).includes("/chat/completions"));
       const request = JSON.parse(String(init?.body));
-      assert.equal(request.model, "test-vision-model");
+      assert.equal(request.model, "test-vision-model:together");
       const content = request.messages[0].content;
       assert.ok(content[1].image_url.url.startsWith("data:image/jpeg;base64,"));
       assert.ok(

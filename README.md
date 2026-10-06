@@ -88,3 +88,15 @@ Captions are limited to 90 characters and 14 words per panel, and at most three 
 `npm run image` saves artwork to `generated/artwork.png` by default and performs local image checks. `npm run render` creates `generated/meme.jpg` without calling a vision model, making it useful for previewing layouts offline. These manual commands do not run the agent's AI quality gate; `upload` and `publish` remain explicit manual operations. The gate applies to `npm run agent`.
 
 Set `HF_VISION_MODEL` and `HF_VISION_PROVIDER` to a supported vision/chat combination in `.env` and in GitHub Actions repository variables before running the agent. The scheduled workflow reads image settings from repository variables (with the existing image-model secret as a fallback), reuses `HF_TOKEN`, and runs type checking and tests before the agent. In restricted environments allow the selected inference destinations and any provider image-download host. A seed helps reproduce artwork under the same provider/model/settings; it does not guarantee identical output across provider updates or improve quality by itself.
+
+## Cloud proxy authentication
+
+Chat requests use Hugging Face's HTTPS router directly, and image requests reuse the SDK's provider adapters while keeping authentication on that router. This supports cloud-injected token bindings that the SDK would otherwise classify as third-party API keys. Credentials are never included in request bodies or error messages.
+
+When running Node.js 22.23.3 behind an environment proxy, enable its built-in proxy support before starting the process:
+
+```sh
+export NODE_USE_ENV_PROXY=1
+```
+
+During live testing, `openai/gpt-oss-120b:fastest` routed to a provider that returned HTTP 403. The explicit `openai/gpt-oss-120b:novita` setting worked for caption generation and review. GPT-OSS requests use low reasoning effort and a minimum 2048-token budget to avoid empty answers when reasoning consumes a short output limit. FLUX.1-dev artwork generation returned HTTP 402 (payment required); successful caption requests do not prove artwork-generation credit/access.

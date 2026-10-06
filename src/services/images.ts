@@ -1,5 +1,4 @@
-import { InferenceClient } from "@huggingface/inference";
-import { getEnv } from "../config/env.js";
+import { textToImage } from "./huggingFace.js";
 import { ART_HEIGHT, ART_WIDTH, getImageConfig } from "../config/images.js";
 
 export function buildArtworkPrompt(visualPrompt: string): string {
@@ -36,10 +35,9 @@ export async function generateImage(
   visualPrompt: string,
   attempt = 0,
 ): Promise<Buffer> {
-  const hf = new InferenceClient(getEnv("HF_TOKEN"));
   const request = buildImageRequest(visualPrompt, attempt);
   console.log(`Generating artwork with ${request.model} (${request.provider})`);
-  const image: unknown = await hf.textToImage(request);
+  const image: unknown = await textToImage(request);
   if (image instanceof Blob) return Buffer.from(await image.arrayBuffer());
   if (image instanceof Uint8Array) return Buffer.from(image);
   if (typeof image === "string") {

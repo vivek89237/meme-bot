@@ -1,4 +1,4 @@
-import { InferenceClient } from "@huggingface/inference";
+import { chatCompletion } from "./huggingFace.js";
 import { getEnv } from "../config/env.js";
 import { cleanJson, createHash } from "../utils/text.js";
 import { validateCaption } from "../memes/caption.js";
@@ -44,13 +44,12 @@ export function parseIdeas(raw: string): MemeIdea[] {
 }
 
 export async function generateIdeas(): Promise<MemeIdea[]> {
-  const response = await new InferenceClient(getEnv("HF_TOKEN")).chatCompletion(
-    {
-      model: getEnv("HF_MODEL"),
-      messages: [
-        {
-          role: "user",
-          content: `Generate 5 original, funny, relatable developer memes suitable for Instagram.
+  const response = await chatCompletion({
+    model: getEnv("HF_MODEL"),
+    messages: [
+      {
+        role: "user",
+        content: `Generate 5 original, funny, relatable developer memes suitable for Instagram.
 Each meme must have topText (setup), bottomText (punchline), visualPrompt (an illustration description), and category.
 Each caption panel must have at most 90 characters and 14 words. Use natural, grammatically correct English.
 Proofread spelling and grammar. No repeated words, hashtags, emoji, offensive content or copyrighted characters.
@@ -58,12 +57,11 @@ The illustration description must depict a visual joke with a clear subject and 
 Do not include any caption wording, written text, speech bubbles, signs or readable computer screens in visualPrompt.
 Return ONLY a JSON array, for example:
 [{"topText":"Finally fixed the bug.","bottomText":"Accidentally added three new features.","visualPrompt":"A relieved developer celebrating beside a computer while three warning lights glow behind them; abstract shapes on the screen.","category":"debugging"}]`,
-        },
-      ],
-      max_tokens: 1800,
-      temperature: 0.7,
-    },
-  );
+      },
+    ],
+    max_tokens: 1800,
+    temperature: 0.7,
+  });
   return parseIdeas(response.choices[0]?.message.content ?? "");
 }
 
@@ -98,12 +96,12 @@ export function parseCaptionReview(raw: string): {
 }
 
 export async function reviewIdeas(ideas: MemeIdea[]): Promise<ReviewedIdea[]> {
-  const hf = new InferenceClient(getEnv("HF_TOKEN"));
+  getEnv("HF_TOKEN");
   const model = getEnv("HF_MODEL");
   const reviewed: ReviewedIdea[] = [];
   for (const idea of ideas) {
     try {
-      const response = await hf.chatCompletion({
+      const response = await chatCompletion({
         model,
         messages: [
           {
