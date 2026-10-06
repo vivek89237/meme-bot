@@ -1,3 +1,4 @@
+import { COUPLE_HASHTAGS } from "./prompts.js";
 import { createHash } from "../utils/text.js";
 
 export interface GeneratedMeme {
@@ -7,20 +8,20 @@ export interface GeneratedMeme {
 }
 
 const categories: string[] = [
-  "programming",
-  "office",
-  "developer",
-  "college",
-  "work",
+  "cuddles",
+  "snacks",
+  "playful-teasing",
+  "missing-you",
+  "sleepy-couple",
   "relatable",
 ];
 
 const ideas: string[] = [
-  "When the code works on the first try",
-  "When production works but localhost doesn't",
-  "When your manager says it is a small change",
-  "When you finally fix a bug and create three more",
-  "When the meeting could have been an email",
+  "When one hug turns into an afternoon of cuddles",
+  "When your snacks become our snacks",
+  "When you say you are not sleepy, then fall asleep on me",
+  "When I steal your blanket but offer a hug in return",
+  "When you pretend to be annoyed but move closer anyway",
 ];
 
 export async function generateMeme(): Promise<GeneratedMeme> {
@@ -29,11 +30,11 @@ export async function generateMeme(): Promise<GeneratedMeme> {
 
   const idea =
     ideas[Math.floor(Math.random() * ideas.length)] ??
-    "When the code works on the first try";
+    "When one hug turns into an afternoon of cuddles";
 
   const caption = `${idea} 😂
 
-#memes #programming #developer #coding #relatable`;
+${COUPLE_HASHTAGS}`;
 
   const hash = createHash(caption);
 

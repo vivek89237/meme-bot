@@ -1,14 +1,10 @@
+import { ARTWORK_STYLE } from "../memes/prompts.js";
 import { textToImage } from "./huggingFace.js";
 import { ART_HEIGHT, ART_WIDTH, getImageConfig } from "../config/images.js";
 
 export function buildArtworkPrompt(visualPrompt: string): string {
   if (!visualPrompt.trim()) throw new Error("A visual description is required");
-  return `Create a polished editorial cartoon illustration of this scene:\n${visualPrompt.trim()}\n
-Consistent style: clean bold outlines, expressive characters, limited teal and warm orange palette,
-soft directional lighting, uncluttered background, clear visual joke, one coherent scene.
-Landscape 4:3 composition. Keep the main subject fully visible with breathing room around the edges.
-Render artwork only. No text, letters, numbers, captions, speech bubbles, UI labels, logos or watermarks.
-Computer displays must use abstract shapes rather than readable text. Do not draw caption panels.`;
+  return `${ARTWORK_STYLE}\n\nScene: ${visualPrompt.trim()}`;
 }
 
 export function buildImageRequest(visualPrompt: string, attempt = 0) {
