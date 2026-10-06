@@ -22,6 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate code
+        run: |
+          npm run typecheck
+          npm test
+
       - name: Run meme agent
         run: npm run agent
         env:
@@ -38,4 +43,11 @@ jobs:
           # Hugging Face
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_MODEL: ${{ secrets.HF_MODEL }}
-          HF_IMAGE_MODEL: ${{ secrets.HF_IMAGE_MODEL }}
+          HF_IMAGE_MODEL: ${{ vars.HF_IMAGE_MODEL || secrets.HF_IMAGE_MODEL || 'black-forest-labs/FLUX.1-dev' }}
+          HF_IMAGE_PROVIDER: ${{ vars.HF_IMAGE_PROVIDER || 'fal-ai' }}
+          HF_IMAGE_STEPS: ${{ vars.HF_IMAGE_STEPS || '28' }}
+          HF_IMAGE_GUIDANCE: ${{ vars.HF_IMAGE_GUIDANCE || '3.5' }}
+          HF_IMAGE_SEED: ${{ vars.HF_IMAGE_SEED }}
+          HF_VISION_MODEL: ${{ vars.HF_VISION_MODEL || secrets.HF_VISION_MODEL }}
+          HF_VISION_PROVIDER: ${{ vars.HF_VISION_PROVIDER }}
+          MEME_TEMPLATE: ${{ vars.MEME_TEMPLATE || 'light' }}

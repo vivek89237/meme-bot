@@ -20,8 +20,20 @@ test("review rejects empty and short captions", async () => {
 
 test("selection chooses the highest score without mutating the input", () => {
   const ideas = [
-    { text: "first", category: "coding", hash: "1", score: 70, reason: "ok" },
     {
+      topText: "First setup",
+      bottomText: "First punchline",
+      visualPrompt: "A developer",
+      text: "first",
+      category: "coding",
+      hash: "1",
+      score: 70,
+      reason: "ok",
+    },
+    {
+      topText: "Second setup",
+      bottomText: "Second punchline",
+      visualPrompt: "A developer",
       text: "second",
       category: "coding",
       hash: "2",

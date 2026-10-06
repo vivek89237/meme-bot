@@ -11,7 +11,8 @@
     "image": "tsx src/cli/image.ts",
     "upload": "tsx src/cli/upload.ts",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "render": "tsx src/cli/render.ts"
   },
   "dependencies": {
     "@huggingface/inference": "^4.13.4",
@@ -20,9 +21,12 @@
     "@supabase/supabase-js": "^2.57.4",
     "axios": "^1.12.2",
     "dotenv": "^17.2.2",
+    "fontkit": "^2.0.4",
+    "sharp": "^0.35.5",
     "ws": "^8.22.0"
   },
   "devDependencies": {
+    "@types/fontkit": "^2.0.9",
     "@types/node": "^24.5.2",
     "@types/ws": "^8.18.2",
     "tsx": "^4.20.5",
