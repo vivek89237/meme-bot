@@ -1,6 +1,11 @@
 import { getEnv, getInstagramConfig } from "../config/env.js";
 import { addToPool, hashExists } from "../services/pool.js";
-import { generateImage } from "../services/images.js";
+import { createMemeImage } from "./createMeme.js";
+import {
+  getImageConfig,
+  getTemplate,
+  getVisionConfig,
+} from "../config/images.js";
 import { uploadImage } from "../services/storage.js";
 import {
   generateIdeas,
@@ -12,7 +17,7 @@ import {
   waitForInstagramContainer,
   publishToInstagram,
 } from "../services/instagram.js";
-import type { MemeIdea, ReviewedIdea } from "../memes/types.js";
+import type { MemeIdea } from "../memes/types.js";
 
 async function removeDuplicates(ideas: MemeIdea[]): Promise<MemeIdea[]> {
   console.log("\n🔎 Checking for duplicate memes...");
@@ -34,33 +39,19 @@ async function removeDuplicates(ideas: MemeIdea[]): Promise<MemeIdea[]> {
 
   return unique;
 }
-async function generateMemeImage(idea: ReviewedIdea): Promise<Buffer> {
-  console.log("\n🎨 Generating meme image...");
-
-  const imagePrompt = `
-Create a visually appealing Instagram meme image.
-
-Meme text:
-"${idea.text}"
-
-Category:
-${idea.category}
-
-Style:
-- modern developer meme
-- clean composition
-- funny
-- highly readable
-- vertical Instagram format
-- no watermark
-- no logos
-- no unnecessary text
-`;
-
-  return generateImage(imagePrompt, getEnv("HF_IMAGE_MODEL"));
-}
 export async function runAgent(): Promise<void> {
+  // Validate mandatory configuration before making paid inference requests.
   const { host: GRAPH_API_HOST } = getInstagramConfig();
+  for (const name of [
+    "HF_TOKEN",
+    "HF_MODEL",
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+  ])
+    getEnv(name);
+  getImageConfig();
+  getVisionConfig();
+  getTemplate();
   console.log("\n========================================");
 
   console.log("🤖 INSTAGRAM AI MEME AGENT");
@@ -96,10 +87,10 @@ export async function runAgent(): Promise<void> {
   }
 
   // 5. Generate image
-  const imageBuffer = await generateMemeImage(selected);
+  const imageBuffer = await createMemeImage(selected);
 
   // 6. Upload
-  const imageUrl = await uploadImage(imageBuffer);
+  const imageUrl = await uploadImage(imageBuffer, "image/jpeg");
 
   // 7. Caption
   const caption =
