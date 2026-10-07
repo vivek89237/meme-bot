@@ -1,6 +1,6 @@
 # Approved character references
 
-Add your own approved images here; no character pictures are bundled.
+Bundled references show Bubu (the white panda) and Dudu (the brown bear), matching the requested color assignments. They are static first-frame PNG exports of the source stickers below. You can replace them with your preferred approved images.
 Use one clean sheet showing both characters, or separate PNG/JPEG/WebP files:
 
 - `white-panda.png`
@@ -20,3 +20,12 @@ HF_CHARACTER_REFERENCES=["assets/characters/white-panda.png","assets/characters/
 For a single existing sheet, list that file instead. The ordinary `HF_IMAGE_MODEL` setting is used only in text mode. Reference generation requires inference credit and access to the chosen image-editing model. Character fidelity is encouraged and reviewed, but is not guaranteed.
 
 For GitHub Actions, commit the approved files or provide them separately during checkout. A local file on your computer is not automatically available to Actions. Configure `HF_IMAGE_MODE`, `HF_REFERENCE_MODEL`, and `HF_CHARACTER_REFERENCES` as Actions Variables (Secrets also work). Never put API tokens into image files or this document.
+
+## Download sources
+
+Downloaded from [amirisback/photo-panda-bear-dudu-bubu](https://github.com/amirisback/photo-panda-bear-dudu-bubu) on 2026-10-07:
+
+- `white-panda.png`: [panda-blink.gif](https://raw.githubusercontent.com/amirisback/photo-panda-bear-dudu-bubu/master/bear-panda/panda-blink.gif), first frame, 240×240.
+- `brown-bear.png`: [bear-blink.gif](https://raw.githubusercontent.com/amirisback/photo-panda-bear-dudu-bubu/master/bear-panda/bear-blink.gif), first frame, 584×550.
+
+The original colors, composition and transparent backgrounds are preserved. These are character appearance references; the brown reference does not show a complete lower body. Source attribution does not establish a reuse license.
