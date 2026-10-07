@@ -1,3 +1,4 @@
+import { usesCharacterReferences } from "../services/characterReferences.js";
 import { getEnv } from "./env.js";
 import {
   INFERENCE_PROVIDERS,
@@ -37,9 +38,18 @@ export function getImageConfig() {
       "HF_IMAGE_PROVIDER must be together, fal-ai or hf-inference; auto routing is disabled",
     );
   }
+  const referenceMode = usesCharacterReferences();
+  if (referenceMode && provider !== "fal-ai")
+    throw new Error(
+      "Reference mode currently supports HF_IMAGE_PROVIDER=fal-ai only",
+    );
   const seed = process.env.HF_IMAGE_SEED?.trim();
   return {
-    model: process.env.HF_IMAGE_MODEL?.trim() || "black-forest-labs/FLUX.1-dev",
+    referenceMode,
+    model: referenceMode
+      ? process.env.HF_REFERENCE_MODEL?.trim() ||
+        "black-forest-labs/FLUX.1-Kontext-dev"
+      : process.env.HF_IMAGE_MODEL?.trim() || "black-forest-labs/FLUX.1-dev",
     provider: provider as InferenceProvider,
     steps: numberSetting("HF_IMAGE_STEPS", 28, 10, 60, true),
     guidance: numberSetting("HF_IMAGE_GUIDANCE", 3.5, 1, 15),

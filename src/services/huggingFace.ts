@@ -76,7 +76,9 @@ export async function chatCompletion(
 /** Reuse the SDK's provider adapters while keeping authentication on the HF proxy route. */
 export async function textToImage(
   input: ReturnType<typeof buildImageRequest>,
+  referenceSheet?: Buffer,
 ): Promise<unknown> {
+  const task = referenceSheet ? "image-to-image" : "text-to-image";
   const response = await request(
     `https://huggingface.co/api/models/${input.model}?expand[]=inferenceProviderMapping`,
   );
@@ -88,11 +90,11 @@ export async function textToImage(
   if (
     !entry ||
     entry.status !== "live" ||
-    entry.task !== "text-to-image" ||
+    entry.task !== task ||
     typeof entry.providerId !== "string"
   ) {
     throw new Error(
-      "Image model/provider pair is not currently live for text-to-image",
+      `Image model/provider pair is not currently live for ${task}; reference mode needs an image-editing model`,
     );
   }
   const mapping: InferenceProviderMappingEntry = {
@@ -100,14 +102,27 @@ export async function textToImage(
     provider: input.provider,
     hfModelId: input.model,
   };
-  const helper = getProviderHelper(input.provider, "text-to-image");
+  const helper = referenceSheet
+    ? getProviderHelper(input.provider, "image-to-image")
+    : getProviderHelper(input.provider, "text-to-image");
+  let args = input;
+  if (referenceSheet) {
+    const referenceHelper = getProviderHelper(input.provider, "image-to-image");
+    if (!referenceHelper.preparePayloadAsync)
+      throw new Error("Provider does not support reference-image inputs");
+    args = (await referenceHelper.preparePayloadAsync({
+      model: input.model,
+      inputs: new Blob([new Uint8Array(referenceSheet)], { type: "image/png" }),
+      parameters: { ...input.parameters, prompt: input.inputs },
+    })) as typeof input;
+  }
   // Do not give the SDK a placeholder to classify as an unrelated provider API key.
   const { url, info } = makeRequestOptionsFromResolvedModel(
     entry.providerId,
     helper,
-    input,
+    args,
     mapping,
-    { task: "text-to-image", outputType: "blob" },
+    { task, outputType: "blob" },
   );
   if (new URL(url).origin !== ROUTER)
     throw new Error("Image requests must use the Hugging Face router");

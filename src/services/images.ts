@@ -1,3 +1,4 @@
+import { loadCharacterReferences } from "./characterReferences.js";
 import { ARTWORK_STYLE } from "../memes/prompts.js";
 import { textToImage } from "./huggingFace.js";
 import { ART_HEIGHT, ART_WIDTH, getImageConfig } from "../config/images.js";
@@ -10,6 +11,9 @@ export function buildArtworkPrompt(visualPrompt: string): string {
 export function buildImageRequest(visualPrompt: string, attempt = 0) {
   const config = getImageConfig();
   const parameters = {
+    ...(config.referenceMode && config.model.includes("Kontext")
+      ? { aspect_ratio: "4:3" }
+      : {}),
     num_inference_steps: config.steps,
     guidance_scale: config.guidance,
     ...(config.seed === undefined
@@ -22,7 +26,11 @@ export function buildImageRequest(visualPrompt: string, attempt = 0) {
   return {
     model: config.model,
     provider: config.provider,
-    inputs: buildArtworkPrompt(visualPrompt),
+    inputs:
+      buildArtworkPrompt(visualPrompt) +
+      (config.referenceMode
+        ? "\nUse the attached character reference sheet as the identity source. Preserve each character's face, ear shape, markings, exact fur colors, proportions and relative size. Change only poses, expressions, props and setting to match the scene. Draw each character once; do not reproduce the reference sheet layout or add text."
+        : ""),
     parameters,
   };
 }
@@ -31,9 +39,10 @@ export async function generateImage(
   visualPrompt: string,
   attempt = 0,
 ): Promise<Buffer> {
+  const referenceSheet = await loadCharacterReferences();
   const request = buildImageRequest(visualPrompt, attempt);
   console.log(`Generating artwork with ${request.model} (${request.provider})`);
-  const image: unknown = await textToImage(request);
+  const image: unknown = await textToImage(request, referenceSheet);
   if (image instanceof Blob) return Buffer.from(await image.arrayBuffer());
   if (image instanceof Uint8Array) return Buffer.from(image);
   if (typeof image === "string") {

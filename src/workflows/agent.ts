@@ -1,3 +1,4 @@
+import { loadCharacterReferences } from "../services/characterReferences.js";
 import { COUPLE_HASHTAGS } from "../memes/prompts.js";
 import { getEnv, getInstagramConfig } from "../config/env.js";
 import { addToPool, hashExists } from "../services/pool.js";
@@ -53,6 +54,7 @@ export async function runAgent(): Promise<void> {
   getImageConfig();
   getVisionConfig();
   getTemplate();
+  await loadCharacterReferences();
   console.log("\n========================================");
 
   console.log("🤖 INSTAGRAM AI MEME AGENT");
