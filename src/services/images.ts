@@ -30,7 +30,7 @@ export function buildImageRequest(visualPrompt: string, attempt = 0) {
     inputs:
       buildArtworkPrompt(visualPrompt) +
       (config.referenceMode
-        ? "\nUse the attached character reference sheet as the identity source. Preserve each character's face, ear shape, markings, exact fur colors, proportions and relative size. Change only poses, expressions, props and setting to match the scene. Draw each character once; do not reproduce the reference sheet layout or add text."
+        ? "\nUse the attached character reference sheet as the identity source. Preserve character identity: ear shapes, markings, exact fur and cheek colors, head and body proportions and relative size. Do not preserve the reference facial expression or standing pose. Freely change eye shapes, eyebrows, mouths, head angles and limb positions to convey the requested emotions and gestures. Replace reference poses, background and props with the requested scene. Prioritize explicit actions, physical contact and prop placement. Draw each character once; do not reproduce the reference sheet layout or add text."
         : ""),
     parameters,
   };

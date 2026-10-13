@@ -74,6 +74,8 @@ const approved = {
   sharp: true,
   compositionClear: true,
   matchesScene: true,
+  expressionsMatchScene: true,
+  gesturesMatchScene: true,
 };
 
 // No request in this test file can reach a live provider.
@@ -295,6 +297,8 @@ test("vision reviews reject unwanted lettering, blur, poor composition and capti
     { sharp: false },
     { compositionClear: false },
     { matchesScene: false },
+    { expressionsMatchScene: false },
+    { gesturesMatchScene: false },
     { score: 79 },
   ]) {
     assert.throws(
