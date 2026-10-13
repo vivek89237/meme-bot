@@ -4,7 +4,11 @@ import sharp from "sharp";
 import { validateCaption } from "../src/memes/caption.js";
 import { getImageConfig } from "../src/config/images.js";
 import { parseIdeas, parseCaptionReview } from "../src/services/ideas.js";
-import { buildArtworkPrompt, buildImageRequest, generateImage } from "../src/services/images.js";
+import {
+  buildArtworkPrompt,
+  buildImageRequest,
+  generateImage,
+} from "../src/services/images.js";
 import { layoutCaption, renderMeme } from "../src/services/renderMeme.js";
 import {
   ImageQualityError,
@@ -74,6 +78,8 @@ const approved = {
   sharp: true,
   compositionClear: true,
   matchesScene: true,
+  expressionsMatchScene: true,
+  gesturesMatchScene: true,
 };
 
 // No request in this test file can reach a live provider.
@@ -142,8 +148,12 @@ test("caption review rejects typos and malformed or non-finite scores", () => {
 test("artwork prompt override retains scene and reference identity instructions", () => {
   const scene = "Both characters sit on a sofa under a blue blanket.";
   const defaultPrompt = buildArtworkPrompt(scene);
-  process.env.HF_ARTWORK_PROMPT = "  Replace the reference poses and background.  ";
-  assert.equal(buildArtworkPrompt(scene), `Replace the reference poses and background.\n\nScene: ${scene}`);
+  process.env.HF_ARTWORK_PROMPT =
+    "  Replace the reference poses and background.  ";
+  assert.equal(
+    buildArtworkPrompt(scene),
+    `Replace the reference poses and background.\n\nScene: ${scene}`,
+  );
   process.env.HF_IMAGE_MODE = "reference";
   const request = buildImageRequest(scene);
   assert.ok(request.inputs.includes(scene));
@@ -262,9 +272,15 @@ test("renderer wraps exact text, creates a deterministic 1080x1350 JPEG and supp
 
 test("local quality gates reject low resolution, blank, corrupted and wrong final formats", async () => {
   await validateImageBytes(await artwork(), "artwork");
-  const rounded = await sharp(await artwork()).resize(1008, 752).png().toBuffer();
+  const rounded = await sharp(await artwork())
+    .resize(1008, 752)
+    .png()
+    .toBuffer();
   await validateImageBytes(rounded, "artwork");
-  const undersized = await sharp(await artwork()).resize(960, 720).png().toBuffer();
+  const undersized = await sharp(await artwork())
+    .resize(960, 720)
+    .png()
+    .toBuffer();
   await assert.rejects(
     validateImageBytes(undersized, "artwork"),
     /received 960×720/,
@@ -295,6 +311,8 @@ test("vision reviews reject unwanted lettering, blur, poor composition and capti
     { sharp: false },
     { compositionClear: false },
     { matchesScene: false },
+    { expressionsMatchScene: false },
+    { gesturesMatchScene: false },
     { score: 79 },
   ]) {
     assert.throws(
@@ -307,6 +325,23 @@ test("vision reviews reject unwanted lettering, blur, poor composition and capti
       ImageQualityError,
     );
   }
+  for (const field of ["expressionsMatchScene", "gesturesMatchScene"]) {
+    const incomplete: Record<string, unknown> = { ...approved };
+    delete incomplete[field];
+    assert.throws(
+      () => parseImageReview(JSON.stringify(incomplete), "artwork", idea),
+      /Invalid image review/,
+    );
+  }
+  assert.throws(
+    () =>
+      parseImageReview(
+        JSON.stringify({ ...approved, gesturesMatchScene: false }),
+        "artwork",
+        idea,
+      ),
+    /quality review: gesturesMatchScene/,
+  );
   const final = {
     ...approved,
     topTextRead: idea.topText,

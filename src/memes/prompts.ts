@@ -25,6 +25,10 @@ Do not place the character descriptions or the names Bubu/Dudu in captions unles
 
 visualPrompt must describe ONE coherent scene featuring BOTH the white panda and brown bear,
 their facial expressions, their interaction, and a simple cozy setting.
+For EACH character specify the emotion and visible cues: eye shape or direction, mouth,
+head tilt, body posture and paw placement. Describe contact between characters and
+where props sit relative to their bodies. Make these actions support the caption joke;
+do not use generic happy expressions for every theme. Keep gestures simple and anatomically clear.
 Make the affection and visual joke evident without readable text.
 Do not describe a multi-panel comic, split screen, before/after sequence or several scenes.
 Do not include caption wording, written text, speech bubbles, signs or readable computer screens.
@@ -39,7 +43,10 @@ minimal shading, soft cream or pale pastel background, very few props.
 Use expressive poses and readable emotions: tiny smiles, affectionate pouting, hugs and sleepy cuddles.
 The mood is warm, playful and tender. Avoid realistic fur, photographic rendering, 3D,
 dramatic lighting, complicated scenery, extra characters or human figures.
-Show exactly one white panda and one brown bear, with their bodies and expressions clearly visible.
+Show exactly one white panda and one brown bear, with their expressions and requested gestures clearly visible.
+Character identity stays consistent, but eye shapes, eyebrows, mouths, head angles and limb positions
+must change to express the scene. Do not copy a neutral reference pose. Allow blankets or props to
+cover body parts when requested; prioritize the scene action over displaying the full body.
 Use ONE coherent landscape 4:3 scene with breathing room around the edges.
 No grids, panel borders, collages, split screens or duplicated characters.
 Render artwork only. No text, letters, numbers, captions, speech bubbles, UI labels, logos or watermarks.

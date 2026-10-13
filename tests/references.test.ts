@@ -60,6 +60,8 @@ const approved = {
   sharp: true,
   compositionClear: true,
   matchesScene: true,
+  expressionsMatchScene: true,
+  gesturesMatchScene: true,
 };
 
 test("reference mode validates files, pads one sheet and selects an editing model", async () => {

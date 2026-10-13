@@ -105,16 +105,15 @@ export async function textToImage(
   const helper = referenceSheet
     ? getProviderHelper(input.provider, "image-to-image")
     : getProviderHelper(input.provider, "text-to-image");
-  let args = input;
+  let args: Parameters<typeof makeRequestOptionsFromResolvedModel>[2] = input;
   if (referenceSheet) {
-    const referenceHelper = getProviderHelper(input.provider, "image-to-image");
-    if (!referenceHelper.preparePayloadAsync)
+    if (!("preparePayloadAsync" in helper) || !helper.preparePayloadAsync)
       throw new Error("Provider does not support reference-image inputs");
-    args = (await referenceHelper.preparePayloadAsync({
+    args = await helper.preparePayloadAsync({
       model: input.model,
       inputs: new Blob([new Uint8Array(referenceSheet)], { type: "image/png" }),
       parameters: { ...input.parameters, prompt: input.inputs },
-    })) as typeof input;
+    });
   }
   // Do not give the SDK a placeholder to classify as an unrelated provider API key.
   const { url, info } = makeRequestOptionsFromResolvedModel(

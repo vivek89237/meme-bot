@@ -1,4 +1,4 @@
-import { usesCharacterReferences } from "../services/characterReferences.js";
+import { usesCharacterReferences } from "./characterReferences.js";
 import { getEnv } from "./env.js";
 import {
   INFERENCE_PROVIDERS,
@@ -7,6 +7,8 @@ import {
 
 export const ART_WIDTH = 1024;
 export const ART_HEIGHT = 768;
+// Some providers round requested dimensions to their native pixel grid.
+export const ART_SIZE_TOLERANCE = 32;
 
 function numberSetting(
   name: string,

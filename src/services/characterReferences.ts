@@ -1,36 +1,50 @@
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import {
+  getReferencePaths,
+  usesCharacterReferences,
+} from "../config/characterReferences.js";
+import { ART_WIDTH, ART_HEIGHT } from "../config/images.js";
 import sharp from "sharp";
 
-export function getReferencePaths(): string[] {
-  const raw = process.env.HF_CHARACTER_REFERENCES?.trim();
-  if (!raw) return [];
-  let paths: unknown;
+async function loadReferenceTile(
+  path: string,
+  width: number,
+  height: number,
+): Promise<Buffer> {
+  let bytes: Buffer;
   try {
-    paths = JSON.parse(raw);
+    bytes = await readFile(path);
   } catch {
     throw new Error(
-      "HF_CHARACTER_REFERENCES must be a JSON array of local image paths",
+      "Cannot read a character reference image; check HF_CHARACTER_REFERENCES paths",
     );
   }
-  if (
-    !Array.isArray(paths) ||
-    paths.length < 1 ||
-    paths.length > 4 ||
-    paths.some((path) => typeof path !== "string" || !path.trim())
-  ) {
+  if (bytes.length > 5_000_000)
+    throw new Error("Each character reference must be at most 5 MB");
+  try {
+    const input = sharp(bytes, { limitInputPixels: 10_000_000 });
+    const metadata = await input.metadata();
+    if (
+      !["png", "jpeg", "webp"].includes(metadata.format ?? "") ||
+      (metadata.pages ?? 1) !== 1 ||
+      !metadata.width ||
+      !metadata.height ||
+      metadata.width < 128 ||
+      metadata.height < 128
+    ) {
+      throw new Error("invalid");
+    }
+    return await input
+      .rotate()
+      .flatten({ background: "white" })
+      .resize(width, height, { fit: "contain", background: "white" })
+      .png()
+      .toBuffer();
+  } catch {
     throw new Error(
-      "HF_CHARACTER_REFERENCES must contain 1–4 nonempty image paths",
+      "Character references must be readable, single-frame PNG/JPEG/WebP images of at least 128×128 pixels",
     );
   }
-  return paths.map((path: string) => resolve(path));
-}
-
-export function usesCharacterReferences(): boolean {
-  const mode = process.env.HF_IMAGE_MODE?.trim();
-  if (mode && mode !== "text" && mode !== "reference")
-    throw new Error("HF_IMAGE_MODE must be text or reference");
-  return mode ? mode === "reference" : getReferencePaths().length > 0;
 }
 
 /** A padded 4:3 sheet conditions generation and vision comparison without cropping. */
@@ -43,50 +57,15 @@ export async function loadCharacterReferences(): Promise<Buffer | undefined> {
     );
   const columns = paths.length === 1 ? 1 : 2;
   const rows = Math.ceil(paths.length / columns);
-  const tileWidth = 1024 / columns;
-  const tileHeight = 768 / rows;
+  const tileWidth = ART_WIDTH / columns;
+  const tileHeight = ART_HEIGHT / rows;
   const tiles = await Promise.all(
-    paths.map(async (path) => {
-      let bytes: Buffer;
-      try {
-        bytes = await readFile(path);
-      } catch {
-        throw new Error(
-          "Cannot read a character reference image; check HF_CHARACTER_REFERENCES paths",
-        );
-      }
-      if (bytes.length > 5_000_000)
-        throw new Error("Each character reference must be at most 5 MB");
-      try {
-        const input = sharp(bytes, { limitInputPixels: 10_000_000 });
-        const metadata = await input.metadata();
-        if (
-          !["png", "jpeg", "webp"].includes(metadata.format ?? "") ||
-          (metadata.pages ?? 1) !== 1 ||
-          !metadata.width ||
-          !metadata.height ||
-          metadata.width < 128 ||
-          metadata.height < 128
-        ) {
-          throw new Error("invalid");
-        }
-        return await input
-          .rotate()
-          .flatten({ background: "white" })
-          .resize(tileWidth, tileHeight, { fit: "contain", background: "white" })
-          .png()
-          .toBuffer();
-      } catch {
-        throw new Error(
-          "Character references must be readable, single-frame PNG/JPEG/WebP images of at least 128×128 pixels",
-        );
-      }
-    }),
+    paths.map((path) => loadReferenceTile(path, tileWidth, tileHeight)),
   );
   return sharp({
     create: {
-      width: 1024,
-      height: 768,
+      width: ART_WIDTH,
+      height: ART_HEIGHT,
       channels: 3,
       background: "white",
     },

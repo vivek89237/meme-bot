@@ -1,12 +1,17 @@
 import { loadCharacterReferences } from "./characterReferences.js";
-import { ARTWORK_STYLE } from "../memes/prompts.js";
+import {
+  buildArtworkInstructions,
+  REFERENCE_IDENTITY_INSTRUCTIONS,
+} from "../memes/imagePrompts.js";
 import { textToImage } from "./huggingFace.js";
 import { ART_HEIGHT, ART_WIDTH, getImageConfig } from "../config/images.js";
 
 export function buildArtworkPrompt(visualPrompt: string): string {
   if (!visualPrompt.trim()) throw new Error("A visual description is required");
-  const instructions = process.env.HF_ARTWORK_PROMPT?.trim() || ARTWORK_STYLE;
-  return `${instructions}\n\nScene: ${visualPrompt.trim()}`;
+  return buildArtworkInstructions(
+    visualPrompt.trim(),
+    process.env.HF_ARTWORK_PROMPT,
+  );
 }
 
 export function buildImageRequest(visualPrompt: string, attempt = 0) {
@@ -29,9 +34,7 @@ export function buildImageRequest(visualPrompt: string, attempt = 0) {
     provider: config.provider,
     inputs:
       buildArtworkPrompt(visualPrompt) +
-      (config.referenceMode
-        ? "\nUse the attached character reference sheet as the identity source. Preserve each character's face, ear shape, markings, exact fur colors, proportions and relative size. Change only poses, expressions, props and setting to match the scene. Draw each character once; do not reproduce the reference sheet layout or add text."
-        : ""),
+      (config.referenceMode ? `\n${REFERENCE_IDENTITY_INSTRUCTIONS}` : ""),
     parameters,
   };
 }
