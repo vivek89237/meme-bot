@@ -62,12 +62,13 @@ const approved = {
   matchesScene: true,
 };
 
-test("reference mode validates files, retains one sheet and selects an editing model", async () => {
+test("reference mode validates files, pads one sheet and selects an editing model", async () => {
   assert.equal(await loadCharacterReferences(), undefined);
   process.env.HF_IMAGE_MODE = "reference";
   await assert.rejects(loadCharacterReferences(), /requires/);
   const sheet = await reference();
-  assert.equal((await sharp(sheet).metadata()).width, 256);
+  assert.equal((await sharp(sheet).metadata()).width, 1024);
+  assert.equal((await sharp(sheet).metadata()).height, 768);
   assert.equal(getImageConfig().model, "black-forest-labs/FLUX.1-Kontext-dev");
   assert.ok(buildImageRequest("A cuddle").inputs.includes("identity source"));
   process.env.HF_CHARACTER_REFERENCES = JSON.stringify([
@@ -84,7 +85,7 @@ test("separate references are composed without cropping and corrupt images fail"
   process.env.HF_CHARACTER_REFERENCES = JSON.stringify([path, path]);
   const metadata = await sharp((await loadCharacterReferences())!).metadata();
   assert.equal(metadata.width, 1024);
-  assert.equal(metadata.height, 512);
+  assert.equal(metadata.height, 768);
   await writeFile(path, "not an image");
   await assert.rejects(loadCharacterReferences(), /readable/);
 });
