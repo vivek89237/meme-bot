@@ -22,7 +22,7 @@ Generation and basic review work locally without credentials. Tests use mocked H
 src/
   cli/          npm command entry points and error handling
   config/       environment loading and validation
-  memes/        local caption generation, basic review, and shared idea types
+  memes/        caption rules, creative prompts, review instructions, and idea types
   services/     AI ideas/artwork, caption rendering, quality checks, storage, Instagram API
   utils/        shared text and hash helpers
   workflows/    full agent orchestration and gated meme composition
@@ -99,11 +99,9 @@ When running Node.js 22.23.3 behind an environment proxy, enable its built-in pr
 export NODE_USE_ENV_PROXY=1
 ```
 
-During live testing, `openai/gpt-oss-120b:fastest` routed to a provider that returned HTTP 403. The explicit `openai/gpt-oss-120b:novita` setting worked for caption generation and review. GPT-OSS requests use low reasoning effort and a minimum 2048-token budget to avoid empty answers when reasoning consumes a short output limit. FLUX.1-dev artwork generation returned HTTP 402 (payment required); successful caption requests do not prove artwork-generation credit/access.
-
 ## Bubu-Dudu couple meme prompts
 
-The default agent theme is now wholesome couple humor: cuddles, snacks, sleepy moments, playful teasing, and everyday affection. Shared instructions live in `src/memes/prompts.ts`; edit `IDEA_PROMPT` for joke topics, `COUPLE_CHARACTERS` for the recurring white-panda/brown-bear descriptions, and `ARTWORK_STYLE` for the soft pastel sticker look. The same character description is included in both idea and artwork prompts. Caption review scores affectionate couple humor, and Instagram captions use couple-meme hashtags.
+The default agent theme is now wholesome couple humor: cuddles, snacks, sleepy moments, playful teasing, and everyday affection. Creative instructions live in `src/memes/prompts.ts`; edit `IDEA_PROMPT` for joke topics, `COUPLE_CHARACTERS` for the recurring white-panda/brown-bear descriptions, and `ARTWORK_STYLE` for the soft pastel sticker look. Reference identity instructions and visual review prompts live in `src/memes/imagePrompts.ts`. The same character description is included in both idea and artwork prompts. Caption review scores affectionate couple humor, and Instagram captions use couple-meme hashtags.
 
 These prompts work with the existing single-scene artwork plus top/bottom caption template. They do not create two- or four-panel comics. Enable reference mode below to condition generation on approved character images. Prompts encourage consistent colors and proportions, but exact character appearance can still vary between generated images. Text stays outside the generated illustration and is rendered in code.
 
@@ -115,14 +113,14 @@ Add approved character files using the guide in `assets/characters/README.md`, t
 HF_IMAGE_MODE=reference
 HF_REFERENCE_MODEL=black-forest-labs/FLUX.1-Kontext-dev
 HF_IMAGE_PROVIDER=fal-ai
-HF_CHARACTER_REFERENCES=["assets/characters/white-panda.png","assets/characters/brown-bear.png"]
+HF_CHARACTER_REFERENCES=["assets/characters/reference-sheet.png"]
 ```
 
 Reference mode uses an image-editing model, rather than the text-only FLUX.1-dev/Schnell configuration. The default Kontext-dev/fal-ai pair was checked against Hugging Face's live image-to-image model mapping. `HF_IMAGE_MODEL` remains the text-mode setting; `HF_REFERENCE_MODEL` selects the reference-mode model. Reference mode currently supports fal-ai only and verifies the chosen model's live image-to-image capability before generation. Missing, corrupt or incompatible inputs stop the command; there is no silent fallback to text-only generation.
 
-The loader accepts one character sheet or up to four individual local PNG/JPEG/WebP files (minimum 128×128, maximum 5 MB each). Multiple references are assembled without cropping. The sheet is sent as image data to the inference service, with instructions to preserve character identity while changing the scene. Reference images are shared with the chosen inference and vision providers; use files you intend to send to those services. Run `npm run image -- "The white panda and brown bear share a sleepy cuddle on a sofa"` as usual. The agent's artwork and final-image vision checks receive the same reference designs and require `charactersMatchReferences=true` before upload. Manual image generation does not run that vision gate.
+The loader accepts one character sheet or up to four individual local PNG/JPEG/WebP files (minimum 128×128, maximum 5 MB each). All references are padded to a 1024×768 sheet without cropping or stretching; multiple files use a side-by-side or two-row layout. The sheet is sent as image data to the inference service, with instructions to preserve character identity while changing the scene. Reference images are shared with the chosen inference and vision providers; use files you intend to send to those services. Run `npm run image -- "The white panda and brown bear share a sleepy cuddle on a sofa"` as usual. The agent's artwork and final-image vision checks receive the same reference designs and require `charactersMatchReferences=true` before upload. Manual image generation does not run that vision gate.
 
-Prompts and reference conditioning improve consistency but cannot guarantee identical characters; the visual reviewer is also model-based. Approved poses composed locally remain the most deterministic option. Bundled character references are available in `assets/characters`, and no paid live reference generation was performed during implementation. GitHub Actions must have the actual files in its checkout plus the three reference settings. Leave `HF_IMAGE_MODE=text` to retain text-only generation.
+Prompts and reference conditioning improve consistency but cannot guarantee identical characters; the visual reviewer is also model-based. Approved poses composed locally remain the most deterministic option. Bundled character references are available in `assets/characters`, and character fidelity depends on the selected model. GitHub Actions must have the actual files in its checkout plus the three reference settings. Leave `HF_IMAGE_MODE=text` to retain text-only generation.
 
 ### Override artwork instructions
 
