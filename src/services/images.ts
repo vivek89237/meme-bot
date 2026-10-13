@@ -5,7 +5,8 @@ import { ART_HEIGHT, ART_WIDTH, getImageConfig } from "../config/images.js";
 
 export function buildArtworkPrompt(visualPrompt: string): string {
   if (!visualPrompt.trim()) throw new Error("A visual description is required");
-  return `${ARTWORK_STYLE}\n\nScene: ${visualPrompt.trim()}`;
+  const instructions = process.env.HF_ARTWORK_PROMPT?.trim() || ARTWORK_STYLE;
+  return `${instructions}\n\nScene: ${visualPrompt.trim()}`;
 }
 
 export function buildImageRequest(visualPrompt: string, attempt = 0) {
