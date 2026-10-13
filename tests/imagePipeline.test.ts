@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { validateCaption } from "../src/memes/caption.js";
 import { getImageConfig } from "../src/config/images.js";
 import { parseIdeas, parseCaptionReview } from "../src/services/ideas.js";
-import { buildImageRequest, generateImage } from "../src/services/images.js";
+import { buildArtworkPrompt, buildImageRequest, generateImage } from "../src/services/images.js";
 import { layoutCaption, renderMeme } from "../src/services/renderMeme.js";
 import {
   ImageQualityError,
@@ -36,6 +36,7 @@ const names = [
   "HF_IMAGE_STEPS",
   "HF_IMAGE_GUIDANCE",
   "HF_IMAGE_SEED",
+  "HF_ARTWORK_PROMPT",
   "HF_VISION_MODEL",
   "HF_VISION_PROVIDER",
   "MEME_TEMPLATE",
@@ -136,6 +137,20 @@ test("caption review rejects typos and malformed or non-finite scores", () => {
     () => parseCaptionReview(JSON.stringify({ ...review, score: 101 })),
     /Invalid/,
   );
+});
+
+test("artwork prompt override retains scene and reference identity instructions", () => {
+  const scene = "Both characters sit on a sofa under a blue blanket.";
+  const defaultPrompt = buildArtworkPrompt(scene);
+  process.env.HF_ARTWORK_PROMPT = "  Replace the reference poses and background.  ";
+  assert.equal(buildArtworkPrompt(scene), `Replace the reference poses and background.\n\nScene: ${scene}`);
+  process.env.HF_IMAGE_MODE = "reference";
+  const request = buildImageRequest(scene);
+  assert.ok(request.inputs.includes(scene));
+  assert.ok(request.inputs.includes("identity source"));
+  process.env.HF_ARTWORK_PROMPT = "   ";
+  assert.equal(buildArtworkPrompt(scene), defaultPrompt);
+  assert.throws(() => buildArtworkPrompt(" "), /description/);
 });
 
 test("model and provider are explicit with fixed artwork size and bounded quality settings", () => {

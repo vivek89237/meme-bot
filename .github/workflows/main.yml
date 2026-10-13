@@ -47,6 +47,7 @@ jobs:
           HF_IMAGE_PROVIDER: ${{ vars.HF_IMAGE_PROVIDER || secrets.HF_IMAGE_PROVIDER || 'fal-ai' }}
           HF_IMAGE_STEPS: ${{ vars.HF_IMAGE_STEPS || secrets.HF_IMAGE_STEPS || '28' }}
           HF_IMAGE_GUIDANCE: ${{ vars.HF_IMAGE_GUIDANCE || secrets.HF_IMAGE_GUIDANCE || '3.5' }}
+          HF_ARTWORK_PROMPT: ${{ vars.HF_ARTWORK_PROMPT || secrets.HF_ARTWORK_PROMPT }}
           HF_IMAGE_SEED: ${{ vars.HF_IMAGE_SEED || secrets.HF_IMAGE_SEED }}
           HF_VISION_MODEL: ${{ vars.HF_VISION_MODEL || secrets.HF_VISION_MODEL }}
           HF_VISION_PROVIDER: ${{ vars.HF_VISION_PROVIDER || secrets.HF_VISION_PROVIDER }}
