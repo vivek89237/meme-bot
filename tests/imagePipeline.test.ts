@@ -247,6 +247,13 @@ test("renderer wraps exact text, creates a deterministic 1080x1350 JPEG and supp
 
 test("local quality gates reject low resolution, blank, corrupted and wrong final formats", async () => {
   await validateImageBytes(await artwork(), "artwork");
+  const rounded = await sharp(await artwork()).resize(1008, 752).png().toBuffer();
+  await validateImageBytes(rounded, "artwork");
+  const undersized = await sharp(await artwork()).resize(960, 720).png().toBuffer();
+  await assert.rejects(
+    validateImageBytes(undersized, "artwork"),
+    /received 960×720/,
+  );
   const tiny = await sharp({
     create: { width: 100, height: 100, channels: 3, background: "red" },
   })

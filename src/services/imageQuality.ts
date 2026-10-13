@@ -31,9 +31,11 @@ export async function validateImageBytes(
       );
     }
     if (stage === "artwork") {
-      if (metadata.width < ART_WIDTH || metadata.height < ART_HEIGHT)
+      // Providers may round requested dimensions to their native pixel grid.
+      // Allow at most 32 pixels per edge; do not upscale low-resolution inputs.
+      if (metadata.width < ART_WIDTH - 32 || metadata.height < ART_HEIGHT - 32)
         throw new ImageQualityError(
-          `Artwork must be at least ${ART_WIDTH}×${ART_HEIGHT}`,
+          `Artwork must be at least ${ART_WIDTH - 32}×${ART_HEIGHT - 32} (target ${ART_WIDTH}×${ART_HEIGHT}); received ${metadata.width}×${metadata.height}`,
         );
       const stats = await input.stats();
       if (stats.channels.slice(0, 3).every((channel) => channel.stdev < 8))
