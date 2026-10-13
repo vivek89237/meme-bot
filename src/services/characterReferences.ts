@@ -33,7 +33,7 @@ export function usesCharacterReferences(): boolean {
   return mode ? mode === "reference" : getReferencePaths().length > 0;
 }
 
-/** The same lossless character sheet conditions generation and vision comparison. */
+/** A padded 4:3 sheet conditions generation and vision comparison without cropping. */
 export async function loadCharacterReferences(): Promise<Buffer | undefined> {
   if (!usesCharacterReferences()) return undefined;
   const paths = getReferencePaths();
@@ -41,6 +41,10 @@ export async function loadCharacterReferences(): Promise<Buffer | undefined> {
     throw new Error(
       "Reference mode requires HF_CHARACTER_REFERENCES; add your approved character images",
     );
+  const columns = paths.length === 1 ? 1 : 2;
+  const rows = Math.ceil(paths.length / columns);
+  const tileWidth = 1024 / columns;
+  const tileHeight = 768 / rows;
   const tiles = await Promise.all(
     paths.map(async (path) => {
       let bytes: Buffer;
@@ -69,7 +73,7 @@ export async function loadCharacterReferences(): Promise<Buffer | undefined> {
         return await input
           .rotate()
           .flatten({ background: "white" })
-          .resize(512, 512, { fit: "contain", background: "white" })
+          .resize(tileWidth, tileHeight, { fit: "contain", background: "white" })
           .png()
           .toBuffer();
       } catch {
@@ -79,31 +83,20 @@ export async function loadCharacterReferences(): Promise<Buffer | undefined> {
       }
     }),
   );
-  // A single approved character sheet retains its full composition and resolution.
-  if (paths.length === 1) {
-    const bytes = await readFile(paths[0]!);
-    return sharp(bytes, { limitInputPixels: 10_000_000 })
-      .rotate()
-      .flatten({ background: "white" })
-      .resize({
-        width: 1536,
-        height: 1536,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .png()
-      .toBuffer();
-  }
   return sharp({
     create: {
-      width: 512 * tiles.length,
-      height: 512,
+      width: 1024,
+      height: 768,
       channels: 3,
       background: "white",
     },
   })
     .composite(
-      tiles.map((input, index) => ({ input, left: index * 512, top: 0 })),
+      tiles.map((input, index) => ({
+        input,
+        left: (index % columns) * tileWidth,
+        top: Math.floor(index / columns) * tileHeight,
+      })),
     )
     .png()
     .toBuffer();
